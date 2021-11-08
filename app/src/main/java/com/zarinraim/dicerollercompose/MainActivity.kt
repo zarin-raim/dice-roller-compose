@@ -1,8 +1,6 @@
 package com.zarinraim.dicerollercompose
 
-import android.content.Context
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -13,13 +11,15 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.Button
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.zarinraim.dicerollercompose.ui.theme.DiceRollerComposeTheme
+import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,9 +28,7 @@ class MainActivity : ComponentActivity() {
             DiceRollerComposeTheme {
                 Surface(color = MaterialTheme.colors.background) {
                     DiceRoller(
-                        onClickRollButton = { context ->
-                            onCLickRollButton(context)
-                        }
+                        onClickRollButton = { onCLickRollButton() }
                     )
                 }
             }
@@ -40,9 +38,10 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun DiceRoller(
-    onClickRollButton: (Context) -> Unit = {}
+    onClickRollButton: () -> Int = { 1 }
 ) {
-    val context = LocalContext.current
+    val rolledDice = remember { mutableStateOf(1) }
+
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -51,11 +50,13 @@ fun DiceRoller(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "1",
+                text = rolledDice.value.toString(),
                 fontSize = 30.sp
             )
 
-            Button(onClick = {onClickRollButton(context)}) {
+            Button(onClick = {
+                rolledDice.value = onClickRollButton()
+            }) {
                 Text(text = stringResource(id = R.string.roll))
             }
         }
@@ -70,6 +71,8 @@ fun DefaultPreview() {
     }
 }
 
-private fun onCLickRollButton(context: Context) {
-    Toast.makeText(context, "Buttons is clicked", Toast.LENGTH_LONG).show()
+private fun onCLickRollButton(): Int {
+    return Random.nextInt(DICE_SIDES) + 1
 }
+
+private const val DICE_SIDES = 6
